@@ -35,6 +35,21 @@ continuous (as applied to a feature or variable)
 
 module HamNNNNclassifier
 
-# package code goes here
+export train, test
+
+function train()
+end
+
+function test()
+end
+
+function main()
+	train()
+	test()
+end
+
+# uncomment the line below, to run this module from the command line.
+# main()
+
 
 end # module
