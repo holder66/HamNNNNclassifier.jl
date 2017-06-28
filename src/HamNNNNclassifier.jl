@@ -5,12 +5,14 @@
 
 module HamNNNNclassifier
 	
-export train, test, readorangeformat
+export main, train, test, readorangeformat, descriptionreport
 
-using DataTables, CategoricalArrays
+using DataTables, CategoricalArrays, CSV, Query
 
 include("HamNNNNclassifierUtilities.jl") # 
+include("HamNNNNclassifierReports.jl")
 
+global version = v"0.1"
 
 """
 Terminology:
@@ -82,9 +84,12 @@ function test()
 	println("testing...")
 end
 
+dataFile="/Users/henryolders/hammingnn/other\ datasets/TestAdjustInputs8.tsv"
+
 function main()
 	train()
 	test()
+	descriptionreport(dataFile)
 end
 
 # uncomment the line below, to run this module from the command line.
