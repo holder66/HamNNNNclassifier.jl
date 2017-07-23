@@ -7,7 +7,7 @@ module HamNNNNclassifier
 	
 export main, train, test, readorangeformat, descriptionreport
 
-using DataTables, CategoricalArrays, CSV, Query
+using DataTables, CategoricalArrays, CSV, Query, StatsBase
 
 include("HamNNNNclassifierUtilities.jl") # 
 include("HamNNNNclassifierReports.jl")
@@ -87,9 +87,10 @@ end
 dataFile="/Users/henryolders/hammingnn/other\ datasets/TestAdjustInputs8.tsv"
 
 function main()
+	printdatafiledescription(dataFile)
+	train_x, train_y = generatetraintesttable(dataFile)
 	train()
 	test()
-	descriptionreport(dataFile)
 end
 
 # uncomment the line below, to run this module from the command line.
