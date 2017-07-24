@@ -19,9 +19,9 @@ function printdatafiledescription(dataFile)
 	# print file path
 	println(dataFile)
 	# print file type
-	println("Orange file format.")
-	codes, names, dt = readorangeformat(dataFile)
-	# @show codes, names, dt
+	println("Orange file format: ", getorangefileformat(dataFile), "\n")
+	codes, names, dt = readorangeformat(dataFile, getorangefileformat(dataFile))
+	@show codes names
 	# describe(dt)
 	#for the class attribute, list each class and the number of cases, % of total, as well as the total
 	printclassdescription(codes, names, dt)
@@ -40,6 +40,8 @@ end
 function printclassdescription(codes, names, table)
 	#for the class attribute, list each class and the number of cases, % of total, as well as the total
 	i, classesVector = extractclassattribute(table, codes)
+	classAttributeName = names[i]
+	println("Class Attribute: ", classAttributeName)
 	casesNo = length(classesVector)
 	# extract unique values
 	# as it is easy to print out the strings for the levels of a categorical array, do the conversion.
@@ -53,7 +55,7 @@ function printclassdescription(codes, names, table)
 	# @show cm levels uniques
 	print_with_color(:blue, "\nClass        Number of cases      Percent of total\n"; bold=true)
 	foreach((x,y) -> print(rpad(y,20,),rpad(get(cm,x,""),20,),signif(get(cm,x,"")*100/casesNo,4),"\n"), uniques, levels)
-	println("total: ", casesNo, " cases\n")
+	print_with_color(:bold, "total: ", casesNo, " cases\n")
 end
 
 function printattributedescriptions(codes, names, table)
@@ -62,6 +64,8 @@ function printattributedescriptions(codes, names, table)
 	# start with a header
 	println()
 	print_with_color(:blue, " Index   Label             Type   Missing      %   Uniques   Min   Max   Mean   Median    Unique Values\n"; bold=true)
+	missingTotal = 0
+	newCodes = Array{String}(length(names))
 	for i in 1:length(names)
 		# print the index and the attribute name
 		name = rpad(names[i], 18, )
@@ -75,8 +79,11 @@ function printattributedescriptions(codes, names, table)
 			typeCode = codes[i]
 		end
 		print(rpad(typeCode,7,))
-		#print number and percent of missing values (nulls)
+		# add the new codes to the existing codes, in a newCodes array
+		newCodes[i] = typeCode
+		# print number and percent of missing values (nulls)
 		missing = length(table[i]) - length(d)
+		missingTotal += missing
 		missingPerCent = roundpercentage(missing * 100 / length(table[i]),2)
 		print(lpad(missing,7,), missingPerCent > 0.0 ? lpad(missingPerCent,7,) : "       ")
 		# print number of unique values
@@ -92,11 +99,17 @@ function printattributedescriptions(codes, names, table)
 			end
 		end
 		print("\n")
-		# name = rpad(names[i], 18, )
-		# typeCode = rpad(codes[i],7,)
-		# uniques = rpad(length(unique(table[i])),10,)
-		# print(lpad(i,6,),"   ", name, typeCode, uniques, "4\n")
 	end
-	# describe(table)
+	# print the total number of missing values and its percentage
+	valuesTotal = prod(size(table))
+	print_with_color(:bold, "Total missing values: ", missingTotal, " out of ", valuesTotal)
+	print_with_color(:bold, " (", roundpercentage(missingTotal * 100 / valuesTotal,2), "%)\n\n")
+	# print the counts for each attribute type and the total
+	print_with_color(:blue, "Attribute Type   Count\n"; bold=true)
+	# print(countmap(newCodes), "\n")
+	for (key, value) in countmap(newCodes)
+		println(rpad(key,14,), lpad(value,8,))
+	end
+	print_with_color(:bold, "Total count:        ", length(newCodes), "\n")
 end
 	
