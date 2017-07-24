@@ -132,8 +132,8 @@ function describediscreteattribute(a::AbstractArray)
 end
 
 """
-Provides codes for continuous or discrete attributes ("C" or "D" respectively) if no code
-was provided, based on whether the attribute values are numbers or not.
+Provide codes for continuous or discrete attributes ("C" or "D" respectively) if no code
+was in the data file, based on whether the attribute values are numbers or not.
 """
 function generateattributecode(vector, code)
 	if code != ""
@@ -141,5 +141,17 @@ function generateattributecode(vector, code)
 	else
 		# test for whether attribute values are from type Real
 		return numericattribute(vector) ? "C" : "D"
+	end
+end
+
+"""
+Change a continuous attribute to discrete, if the attribute is an integer and is a single digit.
+"""
+function changeattributetype(vector)
+	min, max = extrema(vector)
+	if integerattribute(vector) && min >= 0 && max < 10
+		return "D"
+	else
+		return "C"
 	end
 end

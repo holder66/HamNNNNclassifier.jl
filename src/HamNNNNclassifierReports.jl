@@ -78,6 +78,10 @@ function printattributedescriptions(codes, names, table)
 		# print the orange format code; if missing, print "C" for continuous (ie numeric)
 		# and "D" for discrete (ie categorical) attributes
 		typeCode = generateattributecode(d, codes[i])
+		# convert "C" to "D" for integer attributes in range 0 to 9
+		if typeCode == "C"
+			typeCode = changeattributetype(d)
+		end
 		print(rpad(typeCode,7,))
 		# add the new codes to the existing codes, in a newCodes array
 		newCodes[i] = typeCode
