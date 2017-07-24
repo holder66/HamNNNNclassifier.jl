@@ -58,26 +58,26 @@ function printclassdescription(codes, names, table)
 	print_with_color(:bold, "total: ", casesNo, " cases\n")
 end
 
+
 function printattributedescriptions(codes, names, table)
 	# for each attribute, print its name, type, number of uniques, number and % of missing values;
 	# for continuous attributes, print the minimum, maximum, mean, and median
 	# start with a header
 	println()
 	print_with_color(:blue, " Index   Label             Type   Missing      %   Uniques   Min   Max   Mean   Median    Unique Values\n"; bold=true)
+	# initialize a counter to hold the total number of missing values
 	missingTotal = 0
+	# initialize an array for new attribute codes
 	newCodes = Array{String}(length(names))
 	for i in 1:length(names)
 		# print the index and the attribute name
 		name = rpad(names[i], 18, )
 		print(lpad(i,6,),"   ", name)
+		# take out null values to get type purity for type dispatching
 		d = dropnull(table[i])
 		# print the orange format code; if missing, print "C" for continuous (ie numeric)
 		# and "D" for discrete (ie categorical) attributes
-		if codes[i] == ""
-			typeCode = numericattribute(d) ? "C" : "D"
-		else
-			typeCode = codes[i]
-		end
+		typeCode = generateattributecode(d, codes[i])
 		print(rpad(typeCode,7,))
 		# add the new codes to the existing codes, in a newCodes array
 		newCodes[i] = typeCode
@@ -88,15 +88,13 @@ function printattributedescriptions(codes, names, table)
 		print(lpad(missing,7,), missingPerCent > 0.0 ? lpad(missingPerCent,7,) : "       ")
 		# print number of unique values
 		print(lpad(length(unique(d)),10,))
-		if numericattribute(d)
-			((min, max),mean,median) = describeattribute(d)
+		# for continuous attributes, print the minimum, maximum, mean, and median; for discrete
+		# attributes, print the number of unique values.
+		if numericattribute(d) && typeCode == "C"
+			((min, max),mean,median) = describecontinuousattribute(d)
 			print(lpad(min,6,), lpad(max,6,), lpad(roundpercentage(mean,1),7,), lpad(roundpercentage(median,1),9,))	
 		else
-			uniquesNo, uniques = describeattribute(d)
-			print("                                ")
-			for i in 1:length(uniques)
-				print(uniques[i]," ")
-			end
+			printuniquestring(d)
 		end
 		print("\n")
 	end
@@ -112,4 +110,22 @@ function printattributedescriptions(codes, names, table)
 	end
 	print_with_color(:bold, "Total count:        ", length(newCodes), "\n")
 end
-	
+
+function printuniquestring(d)
+	uniquesNo, uniques = describediscreteattribute(d)
+	print("                                ")
+	# if uniquesNo is > 10, print just the first and last 5 values
+	if uniquesNo > 10
+		for i in 1:5
+			print(uniques[i]," ")
+		end
+		print("... ")
+		for i in uniquesNo - 4:uniquesNo
+			print(uniques[i]," ")
+		end
+	else
+		for i in 1:uniquesNo
+			print(uniques[i]," ")
+		end
+	end
+end

@@ -3,7 +3,8 @@
 # HamNNNNclassifier utility functions
 
 """
-Read a dataset file in Orange format; returns a DataTable object.
+Read a dataset file in Orange format; returns a DataTable object, as well as a list
+of attribute names and their codes.
 Columns with string entries are set to categorical vectors.
 """
 function readorangeformat(sourceFile, fileFormat, nullsString=["", "NULL", "NA", "?"])
@@ -37,6 +38,8 @@ function readorangeformat(sourceFile, fileFormat, nullsString=["", "NULL", "NA",
 		thirdLine = [s == "class" ? "c" : s for s in thirdLine]
 		# @show thirdLine
 		# replace corresponding columnCodes with third line codes when available
+		# note that I was unable to find a way for a list comprehension to do this
+		# @show [(s,t) for s in columnCodes, t in thirdLine]
 		for i in 1:length(columnCodes)
 		 	if thirdLine[i] != ""
 		 		columnCodes[i] = thirdLine[i]
@@ -64,10 +67,15 @@ end
 """
 Reads a dataset file and massages it to return a datatable suitable for training or testing,
 and a vector containing values of the class attribute.
+minInteger is a parameter that determines the cutoff for considering an integer attribute
+as being a categorical (ie discrete) attribute. If the number of uniques for an attribute
+is equal to or greater than minInteger; treat as a continuous attribute; else discrete.
 """
-function generatetraintesttable(dataFile)
+function generatetraintesttable(dataFile, minInteger = 10)
 	codes, names, table = readorangeformat(dataFile, getorangefileformat(dataFile))
 	i, classAttributeValues = extractclassattribute(table, codes)
+	# for integer attributes with uniques fewer than minInteger, change code to "D"
+	
 	delete!(table, findunusedcolumns(codes))
 	return table, classAttributeValues
 end
@@ -91,18 +99,47 @@ function extractclassattribute(dataTable, columnCodes)
 end
 
 function roundpercentage(a::Float64, decimals::Integer)
+	# specify the number of decimal places desired
 	a < 10.0 ? signif(a,decimals+1) : signif(a,decimals+2)
 end
 
+"""
+The following two function methods are used to differentiate numeric (ie continuous)
+attributes from non-numeric, ie strings (discrete).
+"""
 numericattribute{T<:Real}(a::AbstractArray{T}) = true
-
 numericattribute(a::AbstractArray) = false
 
-function describeattribute{T<:Real}(a::AbstractArray{T})
+"""
+The first method returns true for integer attributes; the second returns false for 
+non-integer attributes
+"""
+integerattribute{T<:Integer}(a::AbstractArray{T}) = true
+integerattribute(a::AbstractArray) = false
+
+"""
+the first method, for numeric attributes, returns the minimum, maximum, mean, and median.
+the second method, for string (ie discrete) attributes, returns the number of unique values
+and an array with the unique values.
+"""
+function describecontinuousattribute{T<:Real}(a::AbstractArray{T})
 	return extrema(a), mean(a), median(a)
 end
 
-function describeattribute(a::AbstractArray)
+function describediscreteattribute(a::AbstractArray)
 	u = unique(a)
 	return length(u), u
+end
+
+"""
+Provides codes for continuous or discrete attributes ("C" or "D" respectively) if no code
+was provided, based on whether the attribute values are numbers or not.
+"""
+function generateattributecode(vector, code)
+	if code != ""
+		return code
+	else
+		# test for whether attribute values are from type Real
+		return numericattribute(vector) ? "C" : "D"
+	end
 end
