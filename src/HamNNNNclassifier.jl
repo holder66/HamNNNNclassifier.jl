@@ -1,13 +1,15 @@
-#!/Applications/Julia-0.5.app/Contents/Resources/julia/bin/julia
+#!/Applications/Julia-0.6.app/Contents/Resources/julia/bin/julia
 # Nearest Neighbor classifier, neural network based, and employing Hamming distances
 # This classifier works with any mix of categorical or continuous variables, any number of classes,
 # and can handle missing values.
 
+__precompile__()
+
 module HamNNNNclassifier
 	
-export main, train, test, readorangeformat, printdatafiledescription
+export main, train, test, readdatafile, printdatafiledescription, hamclass
 
-using DataTables, CategoricalArrays, CSV, Query, StatsBase
+using DataTables, CategoricalArrays, CSV, Query, StatsBase, ArgParse
 
 include("HamNNNNclassifierUtilities.jl")
 include("HamNNNNclassifierio.jl")
@@ -88,7 +90,9 @@ global version = v"0.1"
 # The evaluation function, which takes a model and a vector of testing indices as input and returns a score that indicates the goodness of the model, as
 # score = evalfun(model, test_inds)
 
-
+function hamclass()
+	println("hamclass...")
+end
 
 function train()
 	println("training...")
@@ -98,6 +102,35 @@ function test()
 	println("testing...")
 end
 
+function parse_commandline()
+	s = ArgParseSettings()
+
+	@add_arg_table s begin
+		"--opt1"
+			help = "an option with an argument"
+		"--opt2", "-o"
+			help = "another option with an argument"
+			arg_type = Int
+			default = 0
+		"--flag1"
+			help = "an option without argument, i.e. a flag"
+			action = :store_true
+		"arg1"
+			help = "a positional argument"
+			required = true
+	end
+
+	return parse_args(s)
+end
+
+# function main()
+# 	parsed_args = parse_commandline()
+# 	println("Parsed args:")
+# 	for (arg,val) in parsed_args
+# 		println("  $arg  =>  $val")
+# 	end
+# end
+
 dataFile="/Users/henryolders/hammingnn/other\ datasets/TestAdjustInputs8.tsv"
 
 function main()
@@ -105,6 +138,11 @@ function main()
 	train_x, train_y = generatetraintesttable(dataFile)
 	train()
 	test()
+end
+
+function rankattributes(file)
+	printdatafiledescription(file)
+	printattributeranking(generateattributeranking())
 end
 
 # uncomment the line below, to run this module from the command line.

@@ -1,4 +1,4 @@
-# __precompile__()
+__precompile__()
 
 # HamNNNNclassifier utility functions
 
@@ -92,4 +92,13 @@ function changeattributetype(vector)
 	else
 		return "C"
 	end
+end
+
+"""
+Return an array containing a rank ordering of the processable attributes in the data file.
+For each attribute, its index, name, type, rank value, and optimized slices (for continuous attributes)
+are included. The array can be printed with printattributeranking().
+"""
+function generateattributeranking(names, codes, table, params)
+	@show names codes params
 end

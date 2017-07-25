@@ -1,9 +1,29 @@
-# __precompile__()
+__precompile__()
 
 # HamNNNNclassifier reporting functions
 
+"""
+Print a report detailing the data file.
+"""
+function printdatafiledescription(dataFile)
+	printheader()
+	print_with_color(:blue, "Data File:\n"; bold=true)
+	# print file path
+	println(dataFile)
+	# print file type
+	format = getorangefileformat(dataFile)
+	println("Orange file format: ", format, "\n")
+	# get the data file contents
+	codes, names, dt = readorangeformat(dataFile, format)
+	# @show codes names
+	#for the class attribute, list each class and the number of cases, % of total, as well as the total
+	printclassdescription(codes, names, dt)
+	printattributedescriptions(codes, names, dt)
+end
+
+
 function printheader()
-	#print date, time, software version, platform, file
+	# print date, time, software version, platform, file
 	print("\n\n")
 	f1 = @sprintf "%18s ; HamNNNNclassifier version %5s" Dates.format(now(), "yyyy-m-d HH:MM:SS") version
 	print_with_color(:blue, f1, "\n"; bold=true)
@@ -13,29 +33,6 @@ function printheader()
 	println()
 end 
 
-function printdatafiledescription(dataFile)
-	printheader()
-	print_with_color(:blue, "Data File:\n"; bold=true)
-	# print file path
-	println(dataFile)
-	# print file type
-	println("Orange file format: ", getorangefileformat(dataFile), "\n")
-	codes, names, dt = readorangeformat(dataFile, getorangefileformat(dataFile))
-	@show codes names
-	# describe(dt)
-	#for the class attribute, list each class and the number of cases, % of total, as well as the total
-	printclassdescription(codes, names, dt)
-	printattributedescriptions(codes, names, dt)
-	# @show extractclassattribute(dt, codes)
-	# @show deleteunusedcolumns(dt, :age)
-	# for each attribute:
-	# index, label, type, numbers of unique,missing, and don't care values, % of total , 
-	# totals and % for missing values
-	# totals and % for don't care values
-	# counts for types of attributes
-	# a rank-ordered list of continuous and discrete attributes
-	# processing time
-end
 	
 function printclassdescription(codes, names, table)
 	#for the class attribute, list each class and the number of cases, % of total, as well as the total
@@ -115,16 +112,20 @@ function printattributedescriptions(codes, names, table)
 	print_with_color(:bold, "Total count:        ", length(newCodes), "\n")
 end
 
+"""
+Print a list of unique values for an attribute. If the list is too long, print just
+its head and tail.
+"""
 function printuniquestring(d)
 	uniquesNo, uniques = describediscreteattribute(d)
 	print("                                ")
 	# if uniquesNo is > 10, print just the first and last 5 values
 	if uniquesNo > 10
-		for i in 1:5
+		for i in 1:4
 			print(uniques[i]," ")
 		end
 		print("... ")
-		for i in uniquesNo - 4:uniquesNo
+		for i in uniquesNo - 3:uniquesNo
 			print(uniques[i]," ")
 		end
 	else
