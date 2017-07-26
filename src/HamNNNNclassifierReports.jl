@@ -14,7 +14,7 @@ function printdatafiledescription(dataFile)
 	format = getorangefileformat(dataFile)
 	println("Orange file format: ", format, "\n")
 	# get the data file contents
-	codes, names, dt = readorangeformat(dataFile, format)
+	codes, names, dt = readdatafile(dataFile)
 	# @show codes names
 	#for the class attribute, list each class and the number of cases, % of total, as well as the total
 	printclassdescription(codes, names, dt)
@@ -133,4 +133,9 @@ function printuniquestring(d)
 			print(uniques[i]," ")
 		end
 	end
+end
+
+function printattributeranking(dataFile)
+	generateattributeranking(dataFile)
+	println("ranking...")
 end

@@ -9,37 +9,47 @@ minInteger is a parameter that determines the cutoff for considering an integer 
 as being a categorical (ie discrete) attribute. If the number of uniques for an attribute
 is equal to or greater than minInteger; treat as a continuous attribute; else discrete.
 """
-function generatetraintesttable(dataFile, minInteger = 10)
-	codes, names, table = readorangeformat(dataFile, getorangefileformat(dataFile))
+function generatetraintesttable(dataFile)
+	codes, names, table = readdatafile(dataFile)
 	i, classAttributeValues = extractclassattribute(table, codes)
-	# for integer attributes with uniques fewer than minInteger, change code to "D"
-	
-	delete!(table, findunusedcolumns(codes))
-	return table, classAttributeValues
+	# @show codes
+	for i in 1:length(names)
+		# take out null values to get type purity for type dispatching
+		d = dropnull(table[i])
+		# for missing codes, fill in "C" or "D"
+		typeCode = generateattributecode(d, codes[i])
+		# convert "C" to "D" for integer attributes in range 0 to 9
+		if typeCode == "C"
+			typeCode = changeattributetype(d)
+		end
+		# add the new codes to the existing codes, in a newCodes array
+		codes[i] = typeCode
+	end
+	delete!(table, unusedcolumns(codes))
+	# @show table unusedcodes(codes) classAttributeValues
+	return table, unusedcodes(codes), classAttributeValues
 end
 
 """
-Takes a vector of orange format codes and returns a vector of indices for the 
-codes which are found in the deleteCodes parameter.
+Takes a vector of orange format codes and returns a vector of indices for delete codes. 
 """
-function findunusedcolumns(columnCodes, deleteCodes=["c", "i", "m", "w"])
-	return [i for i in eachindex(columnCodes) if columnCodes[i] in deleteCodes]
-end
+unusedcolumns(codes, deletes=["c", "i", "m", "w"]) = [i for i in eachindex(codes) if codes[i] in deletes]
+unusedcodes(codes, deletes=["c", "i", "m", "w"]) = [codes[i] for i in eachindex(codes) if ∉(codes[i], deletes)]
 
-function extractclassattribute(dataTable, columnCodes)
+function extractclassattribute(table, codes)
 	# returns an index for the class attribute within the data table, and
 	# a vector with the values for the class attribute
-	for i in eachindex(columnCodes)
-		if columnCodes[i] == "c"
-			return i, dataTable[i]
+	for i in eachindex(codes)
+		if codes[i] == "c"
+			return i, table[i]
 		end
 	end
 end
 
-function roundpercentage(a::Float64, decimals::Integer)
-	# specify the number of decimal places desired
-	a < 10.0 ? signif(a,decimals+1) : signif(a,decimals+2)
-end
+"""
+Round to the number of decimal places desired.
+"""
+roundpercentage(a::Float64, decimals::Integer) = a < 10.0 ? signif(a,decimals+1) : signif(a,decimals+2)
 
 """
 The following two function methods are used to differentiate numeric (ie continuous)
@@ -60,9 +70,7 @@ the first method, for numeric attributes, returns the minimum, maximum, mean, an
 the second method, for string (ie discrete) attributes, returns the number of unique values
 and an array with the unique values.
 """
-function describecontinuousattribute{T<:Real}(a::AbstractArray{T})
-	return extrema(a), mean(a), median(a)
-end
+describecontinuousattribute{T<:Real}(a::AbstractArray{T}) = return extrema(a), mean(a), median(a)
 
 function describediscreteattribute(a::AbstractArray)
 	u = unique(a)
@@ -99,6 +107,7 @@ Return an array containing a rank ordering of the processable attributes in the 
 For each attribute, its index, name, type, rank value, and optimized slices (for continuous attributes)
 are included. The array can be printed with printattributeranking().
 """
-function generateattributeranking(names, codes, table, params)
-	@show names codes params
+function generateattributeranking(dataFile)
+	names, codes, table = readdatafile(dataFile)
+	@show names codes
 end

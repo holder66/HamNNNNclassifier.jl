@@ -7,7 +7,7 @@ __precompile__()
 
 module HamNNNNclassifier
 	
-export main, train, test, readdatafile, printdatafiledescription, hamclass
+export main, train, test, readdatafile, printdatafiledescription, hamclass, generatetraintesttable
 
 using DataTables, CategoricalArrays, CSV, Query, StatsBase, ArgParse
 
@@ -131,18 +131,17 @@ end
 # 	end
 # end
 
+paramDict = Dict
+
 dataFile="/Users/henryolders/hammingnn/other\ datasets/TestAdjustInputs8.tsv"
 
 function main()
 	printdatafiledescription(dataFile)
-	train_x, train_y = generatetraintesttable(dataFile)
+	printattributeranking(dataFile)
+	train_x, train_codes, train_y = generatetraintesttable(dataFile)
+	@show train_x train_codes train_y
 	train()
 	test()
-end
-
-function rankattributes(file)
-	printdatafiledescription(file)
-	printattributeranking(generateattributeranking())
 end
 
 # uncomment the line below, to run this module from the command line.
