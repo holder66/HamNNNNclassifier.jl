@@ -133,13 +133,13 @@ end
 
 paramDict = Dict
 
-dataFile="/Users/henryolders/hammingnn/other\ datasets/TestAdjustInputs8.tsv"
+dataFile="/Users/henryolders/hammingnn/explore/test.tab"
 
 function main()
 	printdatafiledescription(dataFile)
 	printattributeranking(dataFile)
-	train_x, train_codes, train_y = generatetraintesttable(dataFile)
-	@show train_x train_codes train_y
+	# train_x, train_codes, train_y = generatetraintesttable(dataFile)
+	# @show train_x train_codes train_y
 	train()
 	test()
 end

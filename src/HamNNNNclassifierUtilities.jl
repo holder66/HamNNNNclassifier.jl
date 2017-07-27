@@ -106,8 +106,57 @@ end
 Return an array containing a rank ordering of the processable attributes in the data file.
 For each attribute, its index, name, type, rank value, and optimized slices (for continuous attributes)
 are included. The array can be printed with printattributeranking().
-"""
+
+
 function generateattributeranking(dataFile)
-	names, codes, table = readdatafile(dataFile)
-	@show names codes
+	table, codes, classValues = generatetraintesttable(dataFile)
+	classes = unique(classValues)
+	@show table codes classValues
+	# loop thru the attributes
+	for i in eachindex(codes)
+		d = dropnull(table[i])
+		uniques=unique(d)
+		@show i uniques length(uniques)
+		# loop thru unique values
+		for j in eachindex(uniques)
+			# make a list of all values for each class
+			# note the use of get() to enable the == operator; the default "" will always fail
+			@show uniques[j]
+			# loop thru each class
+			for k in eachindex(classes)
+				@show classes[k]
+				# loop thru each case 
+				for m in eachindex(classValues)
+					# test whether
+					if get(classes[k],"") == get(classValues[m],"")
+						@show [get(v,"") == uniques[j] for v in table[i]]
+					end
+				end
+			end
+		end
+	end
 end
+"""
+
+function generateattributeranking(dataFile)
+	table, codes, classValues = generatetraintesttable(dataFile)
+	classes = unique(classValues)
+	labels = names(table)
+	@show labels
+	A = falses(length(codes),length(classValues),length(classes),length(classValues))
+	for i in indices(A,1) # attributes
+		for j in indices(A,2) # unique values for each attribute; since this can be the same as 
+			# the number of cases, set this dimension to number of cases
+			for k in indices(A,3) # classes
+				for m in indices(A,4) # cases
+					# set an element for a particular class k and unique value j of an attribute i
+					# to true if the class for its case m is the same as class k
+					A[i,j,k,m] = get(classes[k],"") == get(classValues[m],"")
+				end
+				@show i labels[i] table[i] j k A[i,j,k,:] sum(A[i,j,k,:])
+			end
+		end
+	end
+	# @show size(A) A
+end
+
