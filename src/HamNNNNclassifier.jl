@@ -7,7 +7,7 @@ __precompile__()
 
 module HamNNNNclassifier
 	
-export main, train, test, readdatafile, printdatafiledescription, hamclass, generatetraintesttable
+export main, train, test, readdatafile, printdatafiledescription, hamclass, generatetraintesttable, printattributeranking, anneal, glass
 
 using DataTables, CategoricalArrays, CSV, Query, StatsBase, ArgParse
 
@@ -143,6 +143,17 @@ function main()
 	train()
 	test()
 end
+
+function anneal()
+	printdatafiledescription("/Users/henryolders/hammingnn/explore/anneal.tab")
+	printattributeranking("/Users/henryolders/hammingnn/explore/anneal.tab")
+end
+
+function glass()
+	printdatafiledescription("/Users/henryolders/hammingnn/explore/glass.tab")
+	printattributeranking("/Users/henryolders/hammingnn/explore/glass.tab")
+end
+
 
 # uncomment the line below, to run this module from the command line.
 main()

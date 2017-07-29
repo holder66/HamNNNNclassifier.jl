@@ -136,6 +136,9 @@ function printuniquestring(d)
 end
 
 function printattributeranking(dataFile)
-	generateattributeranking(dataFile)
+	labels, codes, table, D = generateattributeranking(dataFile)
 	println("ranking...")
+	for i in indices(D,1)
+		println(lpad(i,7), lpad(D[i,2],7),"   ", rpad(labels[D[i,2]],12), lpad(D[i,1],9))
+	end
 end
