@@ -159,7 +159,9 @@ function generateattributeranking(dataFile)
 		C[i,1] = rank
 		C[i,2] = i
 	end
+	sortrows!(C,rev=true)
 	D = sortrows(C,rev=true)
+	
 	# @show labels table D
 	return labels, codes, table, D
 end
