@@ -110,7 +110,7 @@ function generateattributeranking(dataFile)
 	table, codes, classValues = generatetraintesttable(dataFile)
 	classes = unique(classValues)
 	labels = names(table)
-	@show labels table
+	# @show labels table
 	A = falses(length(codes),length(classValues),length(classes),length(classValues))
 	B = zeros(Int32,length(codes),length(classValues),length(classes))
 	for i in indices(A,1) # attributes
@@ -160,7 +160,7 @@ function generateattributeranking(dataFile)
 		C[i,2] = i
 	end
 	D = sortrows(C,rev=true)
-	@show labels table D
+	# @show labels table D
 	return labels, codes, table, D
 end
 

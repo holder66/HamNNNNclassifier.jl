@@ -137,8 +137,14 @@ end
 
 function printattributeranking(dataFile)
 	labels, codes, table, D = generateattributeranking(dataFile)
-	println("ranking...")
+	@show codes
+	print_with_color(:blue, "Attributes in rank order of ability to separate classes:\n"; bold=true)
+	print_with_color(:blue, "  Rank   Index   Label                   Type   RankValue   Optimized Slices\n"; bold=true)
 	for i in indices(D,1)
-		println(lpad(i,7), lpad(D[i,2],7),"   ", rpad(labels[D[i,2]],12), lpad(D[i,1],9))
+		index = lpad(D[i,2], 7)
+		label = rpad(labels[D[i,2]], 24)
+		code = rpad(codes[D[i,2]], 4)
+		rank = lpad(D[i,1], 12)
+		println(lpad(i,7), index,"   ", label, code, rank)
 	end
 end
