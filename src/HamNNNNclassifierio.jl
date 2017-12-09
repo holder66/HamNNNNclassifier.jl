@@ -3,7 +3,7 @@ __precompile__()
 # HamNNNNclassifier io functions
 
 """
-Read a dataset file in Orange format, either Newer or Older; returns a DataTable object, 
+Read a dataset file in Orange format, either Newer or Older; returns a DataFrame object, 
 as well as a list of attribute names and their codes.
 Columns with string values are set to discrete (categorical) attributes (code "D").
 Columns with integer values in the range 0 to 9 are converted to discrete attributes.
@@ -47,7 +47,8 @@ end
 """
 Return a DataTable array object by reading a data file, starting at row, using names.
 """
-readtable(file, names, row) = CSV.read(file, DataTable, delim = '\t', null="?", header=names, datarow=row, weakrefstrings=false)
+readtable(file, names, row) = CSV.read(file, delim = '\t', null="?", header=names, datarow=row, weakrefstrings=false)
+# readtable(file, names, row) = CSV.read(file, DataTable, delim = '\t', null="?", header=names, datarow=row, weakrefstrings=false)
 
 """
 Returns true if file is Newer Orange format, having '#' in its first line.

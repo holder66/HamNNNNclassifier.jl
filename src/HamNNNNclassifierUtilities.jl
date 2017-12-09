@@ -107,15 +107,20 @@ end
 Return an array of the attributes sorted into rank order for relative ability to separate the classes.
 """
 function generateattributeranking(dataFile)
-	table, codes, classValues = generatetraintesttable(dataFile)
+	cs(x::NullableArrays.NullableArray{Int64,1}) = convert(Array, x, 0)
+	cs(x::NullableArrays.NullableArray{Float64,1}) = convert(Array, x, 0.)
+	cs(x::NullableArrays.NullableArray{String,1}) = convert(Array, x, "")	
+	table, codes, classVals = generatetraintesttable(dataFile)
+	classValues = cs(classVals)
 	classes = unique(classValues)
 	labels = names(table)
-	# @show labels table
 	A = falses(length(codes),length(classValues),length(classes),length(classValues))
 	B = zeros(Int32,length(codes),length(classValues),length(classes))
 	for i in indices(A,1) # attributes
 		uniques = unique(dropnull(table[i]))
-		values = table[i]
+		# @show uniques
+		# @show table[i]
+		values = cs(table[i])
 		# @show i labels[i] values uniques
 		for j in eachindex(uniques) # unique values for each attribute
 			# @show j uniques[j]
@@ -125,14 +130,10 @@ function generateattributeranking(dataFile)
 					# @show m classValues[m] values[m]
 					# set an element for a particular class k and unique value j of an attribute i
 					# to true if the class for its case m is the same as class k
-					equalsvaluesuniques(x::T,y::T) where {T<:Any} = x == y
-					equalsvaluesuniques(x::T,y::T) where {T<:Integer} = get(x,0) == get(y,0)
-					equalsvaluesuniques(x::T,y::T) where {T<:Rational} = get(x,0.) == get(y,0.)
-					equalsvaluesuniques(x::Nullable{String},y::String) = get(x,"") == y
-					equalsvaluesuniques(x::Nullable{Int64},y::Int64) = get(x,0) == y
-					equalsvaluesuniques(x::Nullable{Float64},y::Float64) = get(x,0.) == y
-					# @show equalsvaluesuniques(values[m], uniques[j])
-					A[i,j,k,m] = get(classes[k],"") == get(classValues[m],"") && equalsvaluesuniques(values[m], uniques[j]) 
+					# @show classes[k] classValues[m] values[m] uniques[j]
+					A[i,j,k,m] = classes[k] == classValues[m] && values[m] == uniques[j]
+					# B[i,j,k] = sum(classes[k] == classValues[m] && values[m] == uniques[j])
+					
 				end
 				# @show A[i,j,k,:] sum(A[i,j,k,:])
 				# sum along the m dimension; put the result in B
@@ -141,7 +142,6 @@ function generateattributeranking(dataFile)
 		end
 	end
 	# @show size(A) A
-	# @show size(B) B
 	# @show size(B,1)
 	# for each attribute, get the absolute values of the differences between each class
 	C = Array{Int64,2}(length(codes), 2)
@@ -149,7 +149,7 @@ function generateattributeranking(dataFile)
 		rank = 0
 		for j in indices(B,2) # cases
 			for k in indices(B,3) # classes
-				for m in k:size(B,3) 
+				for m in k:size(B,3) # other classes
 					# @show i j k m
 					rank += abs(B[i,j,k] - B[i,j,m])
 				end
@@ -159,9 +159,7 @@ function generateattributeranking(dataFile)
 		C[i,1] = rank
 		C[i,2] = i
 	end
-	sortrows!(C,rev=true)
 	D = sortrows(C,rev=true)
-	
 	# @show labels table D
 	return labels, codes, table, D
 end

@@ -1,4 +1,4 @@
-#!/Applications/Julia-0.6.app/Contents/Resources/julia/bin/julia
+#!/Applications/Julia-0.6.1.app/Contents/Resources/julia/bin/julia
 # Nearest Neighbor classifier, neural network based, and employing Hamming distances
 # This classifier works with any mix of categorical or continuous variables, any number of classes,
 # and can handle missing values.
@@ -9,14 +9,15 @@ module HamNNNNclassifier
 	
 export main, train, test, readdatafile, printdatafiledescription, hamclass, generatetraintesttable, printattributeranking, anneal, glass
 
-using DataTables, CategoricalArrays, CSV, Query, StatsBase, ArgParse
+using NullableArrays, DataFrames, CategoricalArrays, CSV, Query, StatsBase, ArgParse
 
 include("HamNNNNclassifierUtilities.jl")
 include("HamNNNNclassifierio.jl")
 include("HamNNNNclassifierReports.jl")
 
-global version = v"0.1"
-
+global version = v"0.1.1"
+# v0.1.1 discontinues using the DataTables package, which has been deprecated. Uses DataFrames instead.
+# also, need to use NullableArrays specifically, in order to have dropnull.
 
 # Terminology:
 # instances: cases; records; examples
